@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\berk.cinek\\source\\repos\\Task-Tracker\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{4DD39C9A-5EDF-4FFE-B958-A6F3914F31E7}|Task-Tracker\\Task-Tracker.vcxproj|C:\\Users\\berk.cinek\\source\\repos\\Task-Tracker\\Task-Tracker\\Task-Tracker.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{4DD39C9A-5EDF-4FFE-B958-A6F3914F31E7}|Task-Tracker\\Task-Tracker.vcxproj|solutionrelative:Task-Tracker\\Task-Tracker.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Task-Tracker.cpp",
+              "DocumentMoniker": "C:\\Users\\berk.cinek\\source\\repos\\Task-Tracker\\Task-Tracker\\Task-Tracker.cpp",
+              "RelativeDocumentMoniker": "Task-Tracker\\Task-Tracker.cpp",
+              "ToolTip": "C:\\Users\\berk.cinek\\source\\repos\\Task-Tracker\\Task-Tracker\\Task-Tracker.cpp",
+              "RelativeToolTip": "Task-Tracker\\Task-Tracker.cpp",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAFEAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
+              "WhenOpened": "2025-10-13T08:17:11.708Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
