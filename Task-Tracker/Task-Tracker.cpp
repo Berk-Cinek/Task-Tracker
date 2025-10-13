@@ -210,5 +210,10 @@ void update(int id, const std::string& value) {
 }
 
 void del(int id) {
+	TaskCollection tasks = load_task();
 
+	if (tasks.find(id) == tasks.end()){
+
+		
+	}
 }
