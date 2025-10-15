@@ -1,13 +1,15 @@
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include <sstream>
 #include <ctime>
 #include <fstream>
 #include <algorithm>
+#include <vector>
+#include <map>
 
 
 using namespace nlohmann::literals;
 using json = nlohmann::json;
-using TaskCollection = std::map<int, Task>;
 
 enum TaskStatus { TODO, IN_PROGRESS, DONE };
 
@@ -19,21 +21,38 @@ struct Task {
 	time_t UpdatedAt;
 };
 
+using TaskCollection = std::map<int, Task>;
+
+std::vector<std::string> split_line(const std::string& line) {
+	std::stringstream ss(line);
+	std::string token;
+	std::vector<std::string> args;
+
+	while (ss >> token) {
+		args.push_back(token);
+	}
+	return args;
+}
+
 std::string status_to_string(TaskStatus T) {
 	switch (T) {
 	case TaskStatus::TODO: return "Todo";
-	case TaskStatus::IN_PROGRESS: return "In progress";
+	case TaskStatus::IN_PROGRESS: return "In_progress";
 	case TaskStatus::DONE: return "Done";
+
+	default: return "todo";
 	}
 }
 
 TaskStatus string_to_status(std::string T) {
 	if (T == "todo")
 		return TaskStatus::TODO;
-	else if (T == "in progress")
+	else if (T == "in_progress")
 		return TaskStatus::IN_PROGRESS;
 	else if (T == "done")
 		return TaskStatus::DONE;
+
+	return TaskStatus::TODO;
 }
 
 void to_json(json& j, const Task& t) {
@@ -50,6 +69,7 @@ void from_json(const json& j, Task& t) {
 	t.id = j.at("id").get<int>();
 	t.description = j.at("title").get<std::string>();
 	t.status = string_to_status(j.at("status").get<std::string>());
+	t.CreatedAt = j.at("created at").get<time_t>();
 	t.UpdatedAt = j.at("updated at").get<time_t>();
 }
 
@@ -96,68 +116,80 @@ void del(int id);
 
 int main(int argc, char* argv[])
 {
+	std::cout << "--- C++ Task Tracker Shell ---" << std::endl;
 	std::vector<std::string> args(argv, argv + argc);
+	std::string input_line;
 
-	if (argc < 2) {
-		std::cerr << "Usage: " << args[0] << " <command> [arguments...]" << std::endl;
-		return 1;
-	}
+	while (true) {
+		std::cout << "\ntask> ";
 
-	std::string command = args[1];
+		if (!std::getline(std::cin, input_line)) {
+			break;
+		}
+		std::vector<std::string> args = split_line(input_line);
 
-	if (command == "add") {
-		if (argc != 3) {
-			std::cerr << "Error: 'add' requires a task title in quotes." << std::endl;
-			std::cerr << "Usage: " << args[0] << " add \"<task title>\"" << std::endl;
-			return 1;
+		if (args.empty()) {
+			continue;
 		}
 
-		std::string task_title = args[2];
-		add(task_title);
+		std::string command = args[0];
+		int argc = args.size();
+
+		if (command == "exit") {
+			std::cout << "Exiting Task Tracker. Goodbye!" << std::endl;
+			break; 
+		}
+		else if (command == "add") {
+			if (argc != 2) {
+				std::cerr << "Error: 'add' requires a task title." << std::endl;
+			}
+			else {
+				add(args[1]);
+			}
+		}
+		else if (command == "update") {
+			if (argc != 3) {
+				std::cerr << "Error: 'update' requires <ID> and <value>." << std::endl;
+			}
+			else {
+				try {
+					int id = std::stoi(args[1]);
+					std::string value = args[2];
+					update(id, value);
+				}
+				catch (const std::invalid_argument& e) {
+					std::cerr << "Error: Task ID must be a valid number." << std::endl;
+				}
+			}
+		}
+		else if (command == "del") {
+			if (argc != 2) {
+				std::cerr << "Error: 'del' requires a task ID." << std::endl;
+			}
+			else {
+				try {
+					int id = std::stoi(args[1]);
+					del(id);
+				}
+				catch (const std::invalid_argument& e) {
+					std::cerr << "Error: Task ID must be a valid number." << std::endl;
+				}
+			}
+		}
+		else {
+			std::cerr << "Error: Unknown command '" << command << "'. Use 'add', 'update', 'del', or 'exit'." << std::endl;
+		}
 	}
-	else if (command == "update") {
-		if (argc != 4) {
-			std::cerr << "Error: 'update' requires a task and arguments in quotes." << std::endl;
-			std::cerr << "Usage: " << args[0] << "update <ID> \" <new title> \"" << std::endl;
-			std::cerr << "Usage 2: " << args[0] << "mark <ID> <todo|in progress|done>" << std::endl;
-			return 1;
-		}
-		try {
-			int id = std::stoi(args[2]);
-			std::string value = args[3];
-			update(id, value);
-		}
-		catch(std::invalid_argument& e){
-			std::cerr << "Error ID must be a valid number." << std::endl;
-			return 1;
- 		}
-	}
-	else if (command == "del") {
-		if (argc != 2) {
-			std::cerr << "Error: 'del' requires a id." << std::endl;
-			std::cerr << "Usage: " << args[0] << "del <ID>" << std::endl;
-			return 1;
-		}
-		try {
-			int id_to_delete = std::stoi(args[2]);
-			del(id_to_delete);
-		}
-		catch (std::invalid_argument& e) {
-			std::cerr << "Error ID must be a valid number." << std::endl;
-			return 1;
-		}
-	}
-	else {
-		std::cerr << "Error: Unknown command '" << command << "'" << std::endl;
-		return 1;
-	}
+
+	return 0;
+	
 }
 
 void add(const std::string& description) {
 	TaskCollection tasks = load_task();
 
 	int new_id = 1;
-	if (tasks.empty()) {
+	if (!tasks.empty()) {
 		new_id = tasks.rbegin()->first + 1;
 	}
 
@@ -188,7 +220,7 @@ void update(int id, const std::string& value) {
 	std::string lower_value = value;
 	std::transform(lower_value.begin(), lower_value.end(), lower_value.begin(), ::tolower);
 
-	if (lower_value == "todo" || lower_value == "in progress" || lower_value == "done") {
+	if (lower_value == "todo" || lower_value == "in_progress" || lower_value == "done") {
 		task_to_update.status = string_to_status(lower_value);
 		std::cout << "Task #" << id << "status updated to " << status_to_string(task_to_update.status) << std::endl;
 		updated = true;
@@ -216,6 +248,6 @@ void del(int id) {
 		return;
 	}
 	tasks.erase(id);
-	 
+	std::cout << "task #" << id << "has been deleted" << std::endl;
 	save_tasks(tasks);
 }
