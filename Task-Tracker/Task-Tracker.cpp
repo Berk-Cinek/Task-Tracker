@@ -213,7 +213,10 @@ void del(int id) {
 	TaskCollection tasks = load_task();
 
 	if (tasks.find(id) == tasks.end()){
-
-		
+		std::cerr << "Error: Task ID #" << id << "cannot be found" << std::endl;
+		return;
 	}
+	tasks.erase(id);
+	 
+	save_tasks(tasks);
 }
